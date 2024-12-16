@@ -1,19 +1,19 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 
-val kotlinVersion = "1.9.10"
-val serializationVersion = "1.6.0"
-val ktorVersion = "2.3.3"
-val logbackVersion = "1.2.11"
-val kotlinWrappersVersion = "1.0.0-pre.621"
-val kmongoVersion = "4.5.0"
+val kotlinVersion = "2.1.0"
+val serializationVersion = "1.7.3"
+val ktorVersion = "3.0.2"
+val logbackVersion = "1.5.12"
+val kotlinWrappersVersion = "1.0.0-pre.852"
 
 plugins {
-    kotlin("multiplatform") version "1.9.10"
+    kotlin("multiplatform") version "2.1.0"
     application //to run JVM part
-    kotlin("plugin.serialization") version "1.9.10"
+    kotlin("plugin.serialization") version "2.1.0"
 }
 
-group = "org.example"
+group = "codes.aleksandr"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -54,7 +54,6 @@ kotlin {
                 implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
                 implementation("io.ktor:ktor-server-netty:$ktorVersion")
                 implementation("ch.qos.logback:logback-classic:$logbackVersion")
-                implementation("org.litote.kmongo:kmongo-coroutine-serialization:$kmongoVersion")
             }
         }
 
@@ -92,16 +91,33 @@ tasks.named<Jar>("jvmJar").configure {
 
 tasks {
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = "1.8"
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_23)
         }
     }
+    distTar {
+        mustRunAfter("allMetadataJar")
+    }
+    distZip {
+        mustRunAfter("allMetadataJar", "jsJar")
+    }
+}
+
+tasks.named("jsBrowserDevelopmentWebpack") {
+    mustRunAfter("jsJar", "jsProductionExecutableCompileSync")
+}
+
+tasks.named("jsBrowserProductionWebpack") {
+    mustRunAfter(
+        "jsDevelopmentExecutableCompileSync",
+        "jsProductionExecutableCompileSync"
+    )
 }
 
 distributions {
     main {
         contents {
-            from("$buildDir/libs") {
+            from("${layout.buildDirectory}/libs") {
                 rename("${rootProject.name}-jvm", rootProject.name)
                 into("lib")
             }
