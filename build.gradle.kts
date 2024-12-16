@@ -1,16 +1,15 @@
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpack
 
-val kotlinVersion = "2.1.0"
-val serializationVersion = "1.7.3"
-val ktorVersion = "3.0.2"
-val logbackVersion = "1.5.12"
-val kotlinWrappersVersion = "1.0.0-pre.852"
+val kotlinVersion = "1.9.10"
+val serializationVersion = "1.6.0"
+val ktorVersion = "2.3.3"
+val logbackVersion = "1.2.11"
+val kotlinWrappersVersion = "1.0.0-pre.621"
 
 plugins {
-    kotlin("multiplatform") version "2.1.0"
+    kotlin("multiplatform") version "1.9.10"
     application //to run JVM part
-    kotlin("plugin.serialization") version "2.1.0"
+    kotlin("plugin.serialization") version "1.9.10"
 }
 
 group = "codes.aleksandr"
@@ -91,33 +90,16 @@ tasks.named<Jar>("jvmJar").configure {
 
 tasks {
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-        compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_23)
+        kotlinOptions {
+            jvmTarget = "17"
         }
     }
-    distTar {
-        mustRunAfter("allMetadataJar")
-    }
-    distZip {
-        mustRunAfter("allMetadataJar", "jsJar")
-    }
-}
-
-tasks.named("jsBrowserDevelopmentWebpack") {
-    mustRunAfter("jsJar", "jsProductionExecutableCompileSync")
-}
-
-tasks.named("jsBrowserProductionWebpack") {
-    mustRunAfter(
-        "jsDevelopmentExecutableCompileSync",
-        "jsProductionExecutableCompileSync"
-    )
 }
 
 distributions {
     main {
         contents {
-            from("${layout.buildDirectory}/libs") {
+            from("$buildDir/libs") {
                 rename("${rootProject.name}-jvm", rootProject.name)
                 into("lib")
             }

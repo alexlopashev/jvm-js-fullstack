@@ -1,1 +1,1 @@
-web: ./build/install/shoppinglist/bin/shoppinglist
+web: ./build/install/tollbit-fullstack-interview/bin/tollbit-fullstack-interview
